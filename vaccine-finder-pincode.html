@@ -1,0 +1,192 @@
+<html lang="en">
+
+<head>
+	<meta http-equiv="refresh" content="300"> <!-- For 5 mins Auto refresh -->
+	<script>
+	
+    const ageYear = 0; // value should be 0 or 18 or 45
+	const vaccineType = ""; //Value should be COVISHIELD or COVAXIN or empty value.
+	
+    //Grab the pincodes from https://www.indiapost.gov.in/VAS/Pages/findpincode.aspx
+	const pincodes = [530040, 530022, 530017, 531024];
+    
+    
+    
+	// api url
+	const api_url = "https://cdn-api.co-vin.in/api/v2/appointment/sessions/public/calendarByPin";
+	const getDate = (offsetDays = 0) => {
+		var today = new Date();
+		var currentOffset = today.getTimezoneOffset();
+		var ISTOffset = 330; // IST offset UTC +5:30 
+		var today = new Date(today.getTime() + (ISTOffset + currentOffset) * 60000);
+		var dd = String(today.getDate()).padStart(2, '0');
+		var mm = String(today.getMonth() + 1).padStart(2, '0'); //January is 0!
+		var yyyy = today.getFullYear();
+		today = dd + '-' + mm + '-' + yyyy;
+		return today;
+	};
+
+	function randomNumber(min, max) {
+		return Math.random() * (max - min) + min;
+	}
+    
+	const getUrl = (pincode, date, num) => `${api_url}?pincode=${pincode}&date=${date}&_=${num}`;
+    
+	const requests = pincodes => {
+		const date = getDate();
+		const urlRequests = pincodes.map(pincode => ({
+			url: getUrl(pincode, date, randomNumber(247, 18807))
+		}));
+		return urlRequests;
+	};
+    
+	const requestURLs = requests(pincodes);
+
+	async function getapi(requestURLs) {
+		for(let requestURL of requestURLs) {
+			
+			const response = await fetch(requestURL.url, {
+				cache: "no-cache"
+			});
+            
+			var data = await response.json();
+			console.log(data);
+			show(data);
+		}
+        
+		const get_CellValue = (tr, idx) => tr.children[idx].innerText || tr.children[idx].textContent;
+        
+		const compare_table = (idx, asc) => (a, b) => ((v1, v2) => v1 !== '' && v2 !== '' && !isNaN(v1) && !isNaN(v2) ? v1 - v2 : v1.toString().localeCompare(v2))(get_CellValue(asc ? a : b, idx), get_CellValue(asc ? b : a, idx));
+		
+        document.querySelectorAll('th').forEach(th => th.addEventListener('click', (() => {
+			const table = th.closest('table');
+			Array.from(table.querySelectorAll('tr:nth-child(n+2)')).sort(compare_table(Array.from(th.parentNode.children).indexOf(th), this.asc = !this.asc)).forEach(tr => table.appendChild(tr));
+		})));
+	}
+    
+	getapi(requestURLs);
+	
+
+    let tab = `<tr>
+		<th>Name <i class="sort-by-desc"></i><i class="sort-by-asc"></i></th>
+        <th>Pincode <br><i class="sort-by-desc"></i><i class="sort-by-asc"></i></th>
+        <th>Age(yrs) <i class="sort-by-desc"></i><i class="sort-by-asc"></i></th>
+		<th>Availability <br><i class="sort-by-desc"></i><i class="sort-by-asc"></i></th>
+		<th>Date <i class="sort-by-desc"></i><i class="sort-by-asc"></i></th>
+        <th>Vaccine <i class="sort-by-desc"></i><i class="sort-by-asc"></i></th>
+		</tr>`;
+    
+    
+    function showNotification(distCode) {
+       /*if(document.visibilityState === "visible") {
+           return;
+       }*/
+       var title = "Vaccine Notification";
+       icon = "image-url"
+       var body = "Distrct Code - "+distCode;
+       var notification = new Notification('Title', { body, icon });
+       notification.onclick = () => { 
+              notification.close();
+              window.parent.focus();
+       }
+    }
+    
+    function requestAndShowPermission() {
+       Notification.requestPermission(function (permission) {
+          if (permission === "granted") {
+                showNotification();
+          }
+       });
+    }
+    
+	function show(data) {
+		for(let r of data.centers) {
+			for(let s of r.sessions) {
+				if(s.available_capacity > 0 && 
+                   (vaccineType =='' || (vaccineType !='' && s.vaccine == vaccineType)) && 
+                   (ageYear == 0 || (ageYear !=0 && s.min_age_limit == ageYear)))
+				{
+					tab += `<tr><td>${r.name}, ${r.address}, ${r.block_name}, ${r.district_name} <br>Center ID - ${r.center_id} </td>
+                        <td>${r.pincode}</td>
+                        <td>${s.min_age_limit}</td>
+                        <td>${s.available_capacity}</td>
+                        <td>${s.date}</td> 
+                    <td>${s.vaccine}(${s.min_age_limit} yrs.)<br>${r.fee_type}<br><span> ${JSON.stringify(r.vaccine_fees) || ""}</span></td>     
+                    </tr>`;
+				}
+			}
+		}
+		document.getElementById("tablerender").innerHTML = tab;
+	}
+	</script>
+	<style>
+	.redcolor td:nth-child(2) {
+		font-weight: bold;
+	}
+    
+	table {
+		overflow-y: scroll;
+		display: block;
+		width: auto;
+	}
+	
+	th {
+		cursor: pointer;
+	}
+	
+	th,
+	td {
+		border: 1px solid black;
+	}
+
+	span {
+		font-size: small;
+	}
+	
+	.sort-by-asc {
+		left: 3px;
+		display: inline-block;
+		width: 0;
+		height: 0;
+		border: solid 3px transparent;
+		margin: 0;
+		background: transparent;
+		border-bottom: solid 7px #F80;
+		border-top-width: 0;
+	}
+	
+	.sort-by-desc {
+		left: 3px;
+		display: inline-block;
+		width: 0;
+		height: 0;
+		border: solid 3px transparent;
+		margin: 0;
+		background: transparent;
+		border-top: solid 7px #F80;
+		border-bottom-width: 0;
+	}
+	</style>
+    
+	<meta charset="UTF-8" />
+	<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+	<title>Vaccine Finder</title>
+</head>
+
+<body>
+	<h1>Availability Vaccine</h1>
+	IST Time: <span id="timestamp"></span> <br><br>
+	<table id="tablerender"></table>
+	<script>
+	var myVar = setInterval(function() {
+		myTimer();
+	}, 1000);
+
+	function myTimer() {
+		var d = new Date();
+		document.getElementById("timestamp").innerHTML = d.toLocaleTimeString();
+	}
+	</script>
+</body>
+
+</html>
