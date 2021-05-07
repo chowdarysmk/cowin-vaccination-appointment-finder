@@ -26,4 +26,4 @@ Suggested browser to view: Chrome/FireFox.
 Digi locker Team - https://apisetu.gov.in/public/marketplace/api/cowin
 INDIAN POST office - https://www.indiapost.gov.in/VAS/Pages/findpincode.aspx (Find Pincode)
 
-![image](https://user-images.githubusercontent.com/2327337/117461040-c287b580-af6a-11eb-9f40-827b14d30dc2.png)
+<img src="https://user-images.githubusercontent.com/2327337/117461040-c287b580-af6a-11eb-9f40-827b14d30dc2.png" width="350" height="350">
