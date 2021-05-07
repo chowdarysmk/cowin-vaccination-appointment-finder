@@ -7,12 +7,16 @@ The Page will refresh every 5 mins Automatially.. So that, it'll grab the latest
 **Please modify the Below values, According to your Area.**
 ***************************************************************************************
 **ageYear** - value should be 0 or 18 or 45
+
 **vaccineType** - Value should be COVISHIELD or COVAXIN or empty value.
+
 **pincodes** - Grab the pincodes from https://www.indiapost.gov.in/VAS/Pages/findpincode.aspx
+
 **districtCodes**:
-Grab the State Codes from https://cdn-api.co-vin.in/api/v2/admin/location/states 
-Grab the Districts Codes from https://cdn-api.co-vin.in/api/v2/admin/location/districts/{State_ID}
-E.g: AndhraPradesh - https://cdn-api.co-vin.in/api/v2/admin/location/districts/**2**
+
+Grab the State Codes from https://cdn-api.co-vin.in/api/v2/admin/location/states <br> 
+Grab the Districts Codes from https://cdn-api.co-vin.in/api/v2/admin/location/districts/{State_ID}<br>
+E.g: AndhraPradesh - https://cdn-api.co-vin.in/api/v2/admin/location/districts/2
  
 ***************************************************************************************
 
